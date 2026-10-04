@@ -271,7 +271,7 @@ footer{border-top:1px solid var(--line);padding:40px 0 28px}
     <div class="contact-grid">
       <div>
         <div class="social">
-          <a class="btn primary" id="wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="btn primary" id="mail" href="#">E-mail</a>
           <a class="btn" id="ig" href="#" target="_blank" rel="noopener">Instagram</a>
         </div>
         <form id="form" novalidate>
@@ -311,7 +311,7 @@ footer{border-top:1px solid var(--line);padding:40px 0 28px}
     <div class="foot">
       <div><a href="#inicio" class="logo" style="display:inline">JX <span>STUDIO</span></a><p>Design • Edição • Conteúdo Visual</p></div>
       <nav aria-label="Rodapé"><a href="#inicio">Início</a><a href="#servicos">Serviços</a><a href="#portfolio">Portfólio</a><a href="#sobre">Sobre</a><a href="#contato">Contato</a></nav>
-      <div><a id="fig" href="#" target="_blank" rel="noopener">Instagram</a><a id="fwa" href="#" target="_blank" rel="noopener">WhatsApp</a></div>
+      <div><a id="fig" href="#" target="_blank" rel="noopener">Instagram</a><a id="fmail" href="#">E-mail</a></div>
     </div>
     <p class="copy">© 2026 JX Studio. Todos os direitos reservados.</p>
   </div>
@@ -347,8 +347,9 @@ const IMG = {
 /* ============ DADOS EDITÁVEIS ============ */
 const TODO = "[ADICIONAR INFORMAÇÃO]";
 
-// Contatos: troque "#" pelos links reais (ex.: https://wa.me/55DDDNUMERO e https://instagram.com/usuario)
-const CONTACT = { whatsapp: "#", instagram: "#" };
+// Contatos: preencha para ativar os botões. Campos vazios ficam escondidos no site.
+// email: seu Gmail (ex.: "seunome@gmail.com") | instagram: link completo (ex.: "https://instagram.com/seuusuario")
+const CONTACT = { email: "rodrigo.8017@colegioprogresso.g12.br", instagram: "" };
 
 // Portfólio: para adicionar um projeto, copie um bloco e preencha.
 // image: caminho/URL da imagem (ex.: "img/hamburgueria.jpg"). Sem imagem, aparece um fundo em gradiente.
@@ -389,8 +390,9 @@ const thumbStyle = p => p.image ? `background-image:url('${esc(p.image)}')` : `b
 const badge = p => TYPE_LABEL[p.type] || TODO + " (tipo do projeto)";
 
 // Contatos
-["wa","fwa"].forEach(id => $("#"+id).href = CONTACT.whatsapp);
-["ig","fig"].forEach(id => $("#"+id).href = CONTACT.instagram);
+const setLink = (ids, url) => ids.forEach(id => { const a = $("#"+id); if(url){ a.href = url; } else { a.style.display = "none"; } });
+setLink(["mail","fmail"], CONTACT.email ? "mailto:" + CONTACT.email : "");
+setLink(["ig","fig"], CONTACT.instagram);
 
 // Colagem do hero (usa os projetos)
 $("#collage").innerHTML = (PROJECTS.filter(p => p.image).length ? PROJECTS.filter(p => p.image) : PROJECTS).slice(0,4).map(p =>
@@ -449,9 +451,14 @@ $("#form").addEventListener("submit", e => {
   e.preventDefault();
   const f = e.target, note = $("#note");
   if(!f.nome.value.trim() || !f.email.validity.valid || !f.mensagem.value.trim()){ note.textContent = "Preencha nome, email válido e mensagem."; return; }
-  const data = Object.fromEntries(new FormData(f));
-  console.log("Dados do formulário:", data); // TODO: enviar para Formspree, EmailJS, etc.
-  note.textContent = "Formulário ainda não conectado a um serviço de envio. " + TODO;
+  const d = Object.fromEntries(new FormData(f));
+  if(CONTACT.email){
+    const body = `Nome: ${d.nome}\nEmail: ${d.email}\nTipo de projeto: ${d.tipo}\n\n${d.mensagem}`;
+    location.href = "mailto:" + CONTACT.email + "?subject=" + encodeURIComponent("Orçamento - " + d.tipo) + "&body=" + encodeURIComponent(body);
+    note.textContent = "Abrindo seu aplicativo de e-mail para enviar a mensagem.";
+  } else {
+    note.textContent = "Envio ainda não configurado. " + TODO;
+  }
 });
 
 // QR code com o endereço atual do site
